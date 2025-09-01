@@ -1,0 +1,109 @@
+:root {
+    --everpro-blue: #0d6efd;
+    --everpro-bg: #f0f2f5;
+    --dark-sidebar: #212529;
+    --text-light: #adb5bd;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--everpro-bg);
+    margin: 0;
+}
+
+.dashboard-container {
+    display: flex;
+}
+
+/* Sidebar Kiri - Admin */
+.sidebar {
+    width: 280px;
+    background-color: var(--dark-sidebar);
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem 1rem;
+}
+
+.sidebar .logo {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #ffffff;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.sidebar nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar .nav-link {
+    display: block;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    color: var(--text-light);
+    border-radius: 8px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+    background-color: var(--everpro-blue);
+    color: #ffffff !important;
+}
+
+/* Konten Utama */
+.main-content {
+    flex-grow: 1;
+    padding: 2rem;
+}
+
+.main-header {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 1rem 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Gaya untuk kartu statistik */
+.stat-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.stat-card .card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-card .card-icon {
+    font-size: 2.5rem;
+    color: #ffffff;
+    background-color: var(--everpro-blue);
+    border-radius: 50%;
+    padding: 1rem;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.stat-card h5 {
+    font-size: 1.25rem;
+    color: #6c757d;
+}
+
+.stat-card .value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #212529;
+}
