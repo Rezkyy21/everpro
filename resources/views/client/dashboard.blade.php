@@ -8,6 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome untuk ikon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Swiper.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     
     <!-- CSS Kustom yang sudah dipisah -->
     <link rel="stylesheet" href="{{ asset('css/client_custom.css') }}">
@@ -92,11 +94,28 @@
                     </div>
                 </header>
 
-                <!-- Banner Utama (Slider) -->
-                <div class="main-banner">
-                    <img src="{{ asset('images/iklan01.jpg') }}" alt="SPX Express">
+                <!-- Swiper -->
+                <div class="main-banner swiper mySwiper">
+                    <div class="swiper-wrapper">
+                        <!-- Menampilkan iklan secara dinamis dari database -->
+                        @forelse($iklans as $iklan)
+                            <a href="{{ $iklan->link }}" class="swiper-slide">
+                                <img src="{{ asset('storage/iklan/' . $iklan->gambar) }}" onerror="this.onerror=null; this.src='https://placehold.co/800x350/E9F5FF/0d6efd?text=Iklan+Tidak+Ditemukan';" alt="{{ $iklan->judul }}">
+                            </a>
+                        @empty
+                            <div class="swiper-slide d-flex flex-column align-items-center justify-content-center text-center p-5">
+                                <h5 class="text-muted">Tidak ada iklan yang tersedia saat ini.</h5>
+                                <p class="text-muted mt-2">Tambahkan iklan dari dashboard admin untuk ditampilkan di sini.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                    <!-- Add Pagination -->
+                    <div class="swiper-pagination"></div>
+                    <!-- Add Navigation -->
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
                 </div>
-                
+
                 <!-- Selamat Datang & Interaksi -->
                 <div class="card widget-card mt-4">
                     <div class="card-body">
@@ -132,7 +151,7 @@
                         <h5 class="card-title fw-bold">Iklan Bermasalah</h5>
                         <p class="card-text text-muted">Berikut adalah daftar iklan yang bermasalah.</p>
                         <ul class="list-group list-group-flush mt-3">
-                             <!-- Menampilkan daftar iklan bermasalah dari database -->
+                            <!-- Menampilkan daftar iklan bermasalah dari database -->
                             @forelse($problemAds as $ad)
                             <li class="list-group-item d-flex align-items-center border-0 py-2 px-0">
                                 <span class="badge bg-danger rounded-pill me-2">!</span>
@@ -154,5 +173,30 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Swiper.js -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    // Inisialisasi Swiper
+    document.addEventListener('DOMContentLoaded', function () {
+        if (document.querySelector('.swiper')) {
+            const swiper = new Swiper('.mySwiper', {
+                loop: true,
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+                pagination: {
+                    el: ".swiper-pagination",
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: ".swiper-button-next",
+                    prevEl: ".swiper-button-prev",
+                },
+            });
+        }
+    });
+</script>
+
 </body>
 </html>

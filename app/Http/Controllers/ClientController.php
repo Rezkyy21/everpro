@@ -8,6 +8,9 @@ use App\Models\User;
 use App\Models\AdAccount;
 use App\Models\AdCampaign;
 use App\Models\AdPlatform;
+use App\Models\AdReview;
+use App\Models\Iklan;
+use Illuminate\Support\Facades\Storage;
 
 class ClientController extends Controller
 {
@@ -20,13 +23,18 @@ class ClientController extends Controller
         if (!$user) {
             return redirect()->route('login');
         }
+
         $adAccounts = AdAccount::where('user_id', $user->id)->with('platform')->get();
+
         $problemAds = AdCampaign::whereHas('adAccount', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })
         ->where('status', 'problem')
         ->get();
-        return view('client.dashboard', compact('user', 'adAccounts', 'problemAds'));
+        
+        $iklans = Iklan::where('aktif', true)->get();
+
+        return view('client.dashboard', compact('user', 'adAccounts', 'problemAds', 'iklans'));
     }
     
     /**
@@ -57,14 +65,42 @@ class ClientController extends Controller
         if (!$user) {
             return redirect()->route('login');
         }
+        
         $adAccounts = AdAccount::where('user_id', $user->id)->with('platform')->get();
-        $problemAds = AdCampaign::whereHas('adAccount', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })
-        ->where('status', 'problem')
-        ->get();
-        $adReviews = [];
-        return view('client.ad.review', compact('user', 'adAccounts', 'problemAds', 'adReviews'));
+        
+        $adReviews = AdReview::where('user_id', $user->id)
+            ->with(['adAccount.platform'])
+            ->latest()
+            ->get();
+
+        return view('client.ad.review', compact('user', 'adAccounts', 'adReviews'));
+    }
+    
+    /**
+     * Mengajukan review iklan baru.
+     */
+    public function storeAdReview(Request $request)
+    {
+        $request->validate([
+            'ad_account_id' => 'required|exists:ad_accounts,id',
+            'campaign_name' => 'required|string|max:255',
+            'creative_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'creative_text' => 'nullable|string',
+        ]);
+
+        $user = Auth::user();
+        $imagePath = $request->file('creative_image')->store('ad_reviews', 'public');
+
+        AdReview::create([
+            'user_id' => $user->id,
+            'ad_account_id' => $request->ad_account_id,
+            'campaign_name' => $request->campaign_name,
+            'creative_image' => basename($imagePath),
+            'creative_text' => $request->creative_text,
+            'status' => 'pending',
+        ]);
+
+        return redirect()->route('ads.review')->with('success', 'Review iklan berhasil diajukan!');
     }
     
     /**
@@ -97,7 +133,6 @@ class ClientController extends Controller
         }
 
         $adAccounts = AdAccount::where('user_id', $user->id)->with('platform')->get();
-        // Mengambil semua iklan bermasalah untuk ditampilkan di halaman utama konten
         $problemAds = AdCampaign::whereHas('adAccount', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })

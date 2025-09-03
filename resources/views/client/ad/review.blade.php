@@ -8,9 +8,13 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome untuk ikon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
     <!-- CSS Kustom yang sudah dipisah -->
     <link rel="stylesheet" href="{{ asset('css/client_custom.css') }}">
+    <style>
+        .ad-review-creative { max-height: 100px; object-fit: contain; }
+        .dashboard-container { display: flex; }
+        .main-content { flex-grow: 1; padding: 2rem; }
+    </style>
 </head>
 <body>
 
@@ -60,11 +64,10 @@
         </div>
     </aside>
 
-    <!-- Konten Utama dan Sidebar Kanan -->
+    <!-- Konten Utama -->
     <main class="main-content">
         <div class="row g-4">
-            <!-- Kolom Tengah -->
-            <div class="col-lg-8">
+            <div class="col-lg-12">
                 <!-- Header Atas -->
                 <header class="main-header d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center w-50">
@@ -85,65 +88,114 @@
                     <hr>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <ul class="nav nav-pills">
-                            <li class="nav-item"><a class="nav-link active" aria-current="page" href="#">Tahapan Ads</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#">Review Iklan</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#">Tahapan Ads</a></li>
+                            <li class="nav-item"><a class="nav-link active" aria-current="page" href="#">Review Iklan</a></li>
                             <li class="nav-item"><a class="nav-link" href="#">Data Invoice & PKS</a></li>
                             <li class="nav-item"><a class="nav-link" href="#">Pembuatan Ad Account</a></li>
                         </ul>
-                        <button class="btn btn-primary btn-sm">
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#reviewModal">
                             <i class="fas fa-plus me-2"></i>Ajukan Review Iklan
                         </button>
                     </div>
-                    <div class="alert alert-warning d-flex align-items-center" role="alert">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <div>
-                            Ajukan review iklan sekarang agar tim kami bisa menilai konten iklan kamu dan melanjutkan proses aktivasi FB Ad Account Support.
+
+                    @if (session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
-                    </div>
-                    <div class="text-center mt-5">
-                        <img src="https://placehold.co/150x150/f0f2f5/888?text=Data" alt="Placeholder" class="mb-3">
-                        <p class="text-muted">Data Tidak Ditemukan</p>
-                    </div>
-                </div>
+                    @endif
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
-            </div>
-
-            <!-- Kolom Sidebar Kanan -->
-            <div class="col-lg-4">
-                <!-- Widget To Do List -->
-                <div class="card widget-card widget-yellow mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold">To Do List Shipping</h5>
-                        <p class="card-text">Hore, semua To Do List sudah selesai!</p>
-                    </div>
-                </div>
-                <!-- Widget Promo -->
-                <div class="card widget-card">
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold">Iklan Bermasalah</h5>
-                        <p class="card-text text-muted">Berikut adalah daftar iklan yang bermasalah.</p>
-                        <ul class="list-group list-group-flush mt-3">
-                             <!-- Menampilkan daftar iklan bermasalah dari database -->
-                            @forelse($problemAds as $ad)
-                            <li class="list-group-item d-flex align-items-center border-0 py-2 px-0">
-                                <span class="badge bg-danger rounded-pill me-2">!</span>
-                                <div>
-                                    <span class="fw-bold">{{ $ad->campaign_name }}</span>
-                                    <small class="d-block text-muted">Platform: {{ $ad->adAccount->platform->name ?? 'N/A' }}</small>
-                                </div>
-                            </li>
-                            @empty
-                            <li class="list-group-item border-0 text-muted px-0">Tidak ada iklan bermasalah saat ini.</li>
-                            @endforelse
-                        </ul>
-                    </div>
+                    @if($adReviews->isEmpty())
+                        <div class="text-center mt-5">
+                            <img src="https://placehold.co/150x150/f0f2f5/888?text=Data" alt="Placeholder" class="mb-3">
+                            <p class="text-muted">Data Tidak Ditemukan</p>
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Gambar</th>
+                                        <th>Nama Kampanye</th>
+                                        <th>Akun Iklan</th>
+                                        <th>Status</th>
+                                        <th>Catatan Admin</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($adReviews as $review)
+                                        <tr>
+                                            <td>
+                                                <img src="{{ asset('storage/ad_reviews/' . $review->creative_image) }}" alt="{{ $review->campaign_name }}" class="img-thumbnail ad-review-creative">
+                                            </td>
+                                            <td>{{ $review->campaign_name }}</td>
+                                            <td>{{ $review->adAccount->platform->name ?? 'N/A' }}</td>
+                                            <td>
+                                                <span class="badge 
+                                                    @if($review->status == 'pending') bg-warning
+                                                    @elseif($review->status == 'approved') bg-success
+                                                    @else bg-danger @endif">
+                                                    {{ ucfirst($review->status) }}
+                                                </span>
+                                            </td>
+                                            <td>{{ $review->notes ?? 'Tidak ada.' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
     </main>
 </div>
 
+<!-- Modal Ajukan Review Iklan -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reviewModalLabel">Ajukan Review Iklan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('ads.review.store') }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="link_landing_page" class="form-label">*Link Landing Page</label>
+                        <input type="url" class="form-control" id="link_landing_page" name="link_landing_page" placeholder="Contoh: https://landingpageku.domain/" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="link_fanpage" class="form-label">*Link Fanpage</label>
+                        <input type="url" class="form-control" id="link_fanpage" name="link_fanpage" placeholder="Contoh: https://www.facebook.com/FanPageku" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ad_copy" class="form-label">*Ad Copy</label>
+                        <textarea class="form-control" id="ad_copy" name="ad_copy" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="link_creative_asset" class="form-label">*Link Creative Asset</label>
+                        <input type="url" class="form-control" id="link_creative_asset" name="link_creative_asset" placeholder="Contoh: https://drive.google.com/drive/folders/creativeassetku" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Tambah</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

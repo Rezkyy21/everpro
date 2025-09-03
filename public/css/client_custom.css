@@ -17,6 +17,8 @@ body {
 /* Kontainer utama dashboard */
 .dashboard-container {
     display: flex;
+    /* Pastikan kontainer ini mengisi seluruh tinggi viewport */
+    min-height: 100vh;
 }
 
 /* Sidebar Kiri */
@@ -29,6 +31,7 @@ body {
     overflow-y: auto;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     padding: 1.5rem 1rem;
+    flex-shrink: 0; /* Mencegah sidebar mengecil */
 }
 
 .sidebar .logo {
@@ -105,6 +108,9 @@ details[open] .summary-icon {
 .main-content {
     flex-grow: 1;
     padding: 2rem;
+    /* Tambahkan flex-shrink dan overflow untuk mencegah konten meluap */
+    flex-shrink: 1;
+    overflow-x: hidden;
 }
 
 .main-header {
@@ -137,11 +143,15 @@ details[open] .summary-icon {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    height: auto;
+    max-height: 350px;
 }
 
 .main-banner img {
     width: 100%;
     display: block;
+    object-fit: cover;
+    height: 100%;
 }
 
 /* Gaya untuk To Do List dan Promo */

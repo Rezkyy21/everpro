@@ -21,7 +21,7 @@
         <nav>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link active" href="#"><i class="fas fa-chart-line me-2"></i>Dashboard</a>
+                    <a class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}" href="#"><i class="fas fa-chart-line me-2"></i>Dashboard</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#"><i class="fas fa-users me-2"></i>Manajemen User</a>
@@ -32,17 +32,36 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#"><i class="fas fa-box me-2"></i>Manajemen Produk</a>
                 </li>
+                
+                <!-- Menu "Manajemen Iklan" dengan Submenu -->
+                <li class="nav-item">
+                    <details {{ Request::routeIs('admin.iklan.*') ? 'open' : '' }}>
+                        <summary class="nav-link d-flex justify-content-between align-items-center">
+                            <div><i class="fas fa-bullhorn me-2"></i>Manajemen Iklan</div>
+                            <i class="fas fa-chevron-down summary-icon"></i>
+                        </summary>
+                        <ul class="sub-menu">
+                            <li class="nav-item">
+                                <a class="nav-link {{ Request::routeIs('admin.iklan.index') ? 'active' : '' }}" href="{{ route('admin.iklan.index') }}">Lihat Daftar Iklan</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ Request::routeIs('admin.iklan.create') ? 'active' : '' }}" href="{{ route('admin.iklan.create') }}">Tambah Iklan Baru</a>
+                            </li>
+                        </ul>
+                    </details>
+                </li>
+                
                 <li class="nav-item">
                     <a class="nav-link" href="#"><i class="fas fa-cog me-2"></i>Pengaturan</a>
                 </li>
-                <form method="POST" action="{{ route('logout') }}">
-    @csrf
-    <button type="submit">
-        Log Out
-    </button>
-</form>
             </ul>
         </nav>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit">
+                Log Out
+            </button>
+        </form>
     </aside>
 
     <!-- Konten Utama -->
